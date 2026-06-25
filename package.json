@@ -6,10 +6,18 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Abraxas-365/yatai-demo-todoapp.git"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
+  "bugs": {
+    "url": "https://github.com/Abraxas-365/yatai-demo-todoapp/issues"
+  },
+  "homepage": "https://github.com/Abraxas-365/yatai-demo-todoapp#readme",
+  "dependencies": {
     "@playwright/test": "^1.61.1"
   }
 }

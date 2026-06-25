@@ -5,275 +5,213 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Todo App</title>
   <style>
-    /* ── Reset & Base ──────────────────────────────────────── */
     *, *::before, *::after {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
     }
 
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont,
-                   'Helvetica Neue', Arial, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: #f0f2f5;
+      color: #1a1a2e;
       min-height: 100vh;
       display: flex;
-      align-items: flex-start;
       justify-content: center;
-      padding: 60px 20px;
-      color: #333;
+      padding: 40px 16px;
     }
 
-    /* ── App Container ─────────────────────────────────────── */
     .app {
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
       width: 100%;
       max-width: 520px;
-      overflow: hidden;
     }
 
-    /* ── Header ────────────────────────────────────────────── */
-    .header {
-      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-      padding: 32px 28px 28px;
+    /* ── Header ────────────────────────────────────── */
+    header {
       text-align: center;
+      margin-bottom: 32px;
     }
 
-    .header h1 {
-      font-size: 1.75rem;
+    header h1 {
+      font-size: 2.25rem;
       font-weight: 700;
-      color: #ffffff;
-      letter-spacing: -0.02em;
+      color: #4361ee;
+      letter-spacing: -0.5px;
     }
 
-    .header p {
-      color: rgba(255, 255, 255, 0.75);
-      font-size: 0.9rem;
-      margin-top: 4px;
+    header p {
+      margin-top: 6px;
+      font-size: 0.95rem;
+      color: #6b7280;
     }
 
-    /* ── Input Area ────────────────────────────────────────── */
+    /* ── Input area ────────────────────────────────── */
     .input-area {
       display: flex;
-      padding: 24px 24px 0;
       gap: 10px;
+      margin-bottom: 24px;
     }
 
     #todo-input {
       flex: 1;
       padding: 14px 18px;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      font-family: inherit;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      font-size: 1rem;
+      border: 2px solid #d1d5db;
+      border-radius: 12px;
       outline: none;
-      color: #334155;
-    }
-
-    #todo-input::placeholder {
-      color: #94a3b8;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      background: #fff;
     }
 
     #todo-input:focus {
-      border-color: #6366f1;
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+      border-color: #4361ee;
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+    }
+
+    #todo-input::placeholder {
+      color: #9ca3af;
     }
 
     #add-btn {
-      padding: 14px 22px;
-      background: #6366f1;
-      color: #ffffff;
-      border: none;
-      border-radius: 10px;
-      font-size: 0.95rem;
+      padding: 14px 24px;
+      font-size: 1rem;
       font-weight: 600;
-      font-family: inherit;
+      color: #fff;
+      background-color: #4361ee;
+      border: none;
+      border-radius: 12px;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
+      transition: background-color 0.2s, transform 0.1s;
       white-space: nowrap;
     }
 
     #add-btn:hover {
-      background: #4f46e5;
+      background-color: #3a56d4;
     }
 
     #add-btn:active {
       transform: scale(0.97);
     }
 
-    /* ── Todo List ──────────────────────────────────────────── */
+    /* ── Todo list ─────────────────────────────────── */
     #todo-list {
       list-style: none;
-      padding: 16px 24px 24px;
-      min-height: 120px;
-    }
-
-    #todo-list:empty::after {
-      content: "No todos yet. Add one above!";
-      display: block;
-      text-align: center;
-      color: #94a3b8;
-      font-size: 0.9rem;
-      padding: 40px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
 
     .todo-item {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 14px 16px;
-      background: #f8fafc;
-      border-radius: 10px;
-      margin-top: 8px;
-      transition: background 0.2s, opacity 0.2s;
+      padding: 14px 18px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      transition: box-shadow 0.2s;
     }
 
     .todo-item:hover {
-      background: #f1f5f9;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     }
 
     .todo-item input[type="checkbox"] {
-      appearance: none;
-      width: 22px;
-      height: 22px;
-      border: 2px solid #cbd5e1;
-      border-radius: 6px;
+      width: 20px;
+      height: 20px;
+      accent-color: #4361ee;
       cursor: pointer;
       flex-shrink: 0;
-      transition: background 0.2s, border-color 0.2s;
-      position: relative;
-    }
-
-    .todo-item input[type="checkbox"]:checked {
-      background: #6366f1;
-      border-color: #6366f1;
-    }
-
-    .todo-item input[type="checkbox"]:checked::after {
-      content: "\2713";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #fff;
-      font-size: 14px;
-      font-weight: bold;
     }
 
     .todo-item span {
       flex: 1;
-      font-size: 0.95rem;
-      color: #334155;
+      font-size: 1rem;
       transition: color 0.2s, text-decoration 0.2s;
     }
 
     .todo-item.completed span {
       text-decoration: line-through;
-      color: #94a3b8;
+      color: #9ca3af;
     }
 
     .todo-item .delete-btn {
       background: none;
       border: none;
-      color: #cbd5e1;
+      color: #ef4444;
       font-size: 1.2rem;
       cursor: pointer;
-      padding: 4px 6px;
+      padding: 4px;
       border-radius: 6px;
-      transition: color 0.2s, background 0.2s;
       line-height: 1;
+      transition: background-color 0.2s;
     }
 
     .todo-item .delete-btn:hover {
-      color: #ef4444;
-      background: #fef2f2;
+      background-color: #fee2e2;
     }
 
-    /* ── Footer ─────────────────────────────────────────────── */
-    .footer {
-      padding: 16px 24px;
-      border-top: 1px solid #f1f5f9;
+    /* ── Empty state ───────────────────────────────── */
+    .empty-state {
       text-align: center;
-      color: #94a3b8;
-      font-size: 0.8rem;
-    }
-
-    /* ── Responsive ─────────────────────────────────────────── */
-    @media (max-width: 480px) {
-      body {
-        padding: 30px 12px;
-      }
-      .header {
-        padding: 24px 20px 20px;
-      }
-      .input-area {
-        padding: 16px 16px 0;
-        flex-direction: column;
-      }
-      #todo-list {
-        padding: 12px 16px 16px;
-      }
+      padding: 48px 0;
+      color: #9ca3af;
+      font-size: 0.95rem;
     }
   </style>
 </head>
 <body>
   <div class="app">
     <!-- Header -->
-    <div class="header">
+    <header>
       <h1>Todo App</h1>
-      <p>Stay organized, get things done</p>
-    </div>
+      <p>Stay organized, get things done.</p>
+    </header>
 
-    <!-- Input Area -->
+    <!-- Input area -->
     <div class="input-area">
       <input
         type="text"
         id="todo-input"
         placeholder="What needs to be done?"
-        aria-label="New todo text"
+        aria-label="New todo"
         autocomplete="off"
-      >
+      />
       <button id="add-btn" type="button">Add</button>
     </div>
 
-    <!-- Todo List Container -->
-    <ul id="todo-list"></ul>
+    <!-- Todo list container -->
+    <ul id="todo-list">
+      <!-- Todo items will be added here dynamically -->
+    </ul>
 
-    <!-- Footer -->
-    <div class="footer">
-      <span id="todo-count">0 items</span>
+    <div class="empty-state" id="empty-state">
+      <p>No todos yet. Add one above!</p>
     </div>
   </div>
 
   <script>
-    // ── DOM refs ────────────────────────────────────────────
     const input   = document.getElementById('todo-input');
     const addBtn  = document.getElementById('add-btn');
     const list    = document.getElementById('todo-list');
-    const counter = document.getElementById('todo-count');
+    const empty   = document.getElementById('empty-state');
 
-    // ── Helpers ─────────────────────────────────────────────
-    function updateCount() {
-      const total     = list.querySelectorAll('.todo-item').length;
-      const remaining = list.querySelectorAll('.todo-item:not(.completed)').length;
-      counter.textContent = remaining === 1
-        ? '1 item left'
-        : remaining + ' items left';
+    function updateEmptyState() {
+      empty.style.display = list.children.length === 0 ? 'block' : 'none';
     }
 
-    function createTodoItem(text) {
+    function addTodo() {
+      const text = input.value.trim();
+      if (!text) return;
+
       const li = document.createElement('li');
       li.className = 'todo-item';
 
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.setAttribute('aria-label', 'Mark as complete');
-      cb.addEventListener('change', () => {
-        li.classList.toggle('completed', cb.checked);
-        updateCount();
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.addEventListener('change', () => {
+        li.classList.toggle('completed', checkbox.checked);
       });
 
       const span = document.createElement('span');
@@ -281,36 +219,29 @@
 
       const del = document.createElement('button');
       del.className = 'delete-btn';
-      del.innerHTML = '&times;';
-      del.setAttribute('aria-label', 'Delete todo');
+      del.textContent = '\u00D7';
+      del.title = 'Delete';
       del.addEventListener('click', () => {
         li.remove();
-        updateCount();
+        updateEmptyState();
       });
 
-      li.appendChild(cb);
+      li.appendChild(checkbox);
       li.appendChild(span);
       li.appendChild(del);
-      return li;
-    }
+      list.appendChild(li);
 
-    function addTodo() {
-      const text = input.value.trim();
-      if (!text) return;
-      list.appendChild(createTodoItem(text));
       input.value = '';
       input.focus();
-      updateCount();
+      updateEmptyState();
     }
 
-    // ── Events ──────────────────────────────────────────────
     addBtn.addEventListener('click', addTodo);
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') addTodo();
     });
 
-    // Initial count
-    updateCount();
+    updateEmptyState();
   </script>
 </body>
 </html>

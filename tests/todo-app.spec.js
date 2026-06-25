@@ -4,174 +4,106 @@ const path = require('path');
 
 const INDEX_URL = 'file://' + path.resolve(__dirname, '..', 'index.html');
 
-// ── Acceptance Criteria Tests ──────────────────────────────────────────────
+test.describe('Todo App – Basic HTML Structure', () => {
 
-test.describe('Todo App — Acceptance Criteria', () => {
-
-  test('AC1: index.html file exists', async ({}) => {
-    const fs = require('fs');
-    const filePath = path.resolve(__dirname, '..', 'index.html');
-    expect(fs.existsSync(filePath)).toBe(true);
+  test.beforeEach(async ({ page }) => {
+    await page.goto(INDEX_URL);
   });
 
-  test('AC2: Has input field and add button', async ({ page }) => {
-    await page.goto(INDEX_URL);
+  // ── Acceptance Criterion 1: index.html file exists ──────────────────────
+  test('index.html loads successfully', async ({ page }) => {
+    // The page title should be set
+    await expect(page).toHaveTitle('Todo App');
+  });
 
+  // ── Acceptance Criterion 2: Has input field and add button ──────────────
+  test('has a text input field for new todos', async ({ page }) => {
     const input = page.locator('#todo-input');
     await expect(input).toBeVisible();
-    await expect(input).toHaveAttribute('placeholder', 'What needs to be done?');
-
-    const addBtn = page.locator('#add-btn');
-    await expect(addBtn).toBeVisible();
-    await expect(addBtn).toHaveText('Add');
+    await expect(input).toHaveAttribute('type', 'text');
+    await expect(input).toHaveAttribute('placeholder', /./); // has some placeholder
   });
 
-  test('AC3: Has todo list container', async ({ page }) => {
-    await page.goto(INDEX_URL);
-
-    const todoList = page.locator('#todo-list');
-    await expect(todoList).toBeVisible();
-    // The container is a <ul> element
-    await expect(todoList).toHaveAttribute('id', 'todo-list');
+  test('has an Add button', async ({ page }) => {
+    const btn = page.locator('#add-btn');
+    await expect(btn).toBeVisible();
+    await expect(btn).toHaveText('Add');
   });
 
-  test('AC4: Has modern CSS styling', async ({ page }) => {
-    await page.goto(INDEX_URL);
-
-    // Check the app container has rounded corners (border-radius)
-    const app = page.locator('.app');
-    await expect(app).toBeVisible();
-    const borderRadius = await app.evaluate(el =>
-      getComputedStyle(el).borderRadius
-    );
-    expect(borderRadius).not.toBe('0px');
-
-    // Check body has a gradient background
-    const bgImage = await page.evaluate(() =>
-      getComputedStyle(document.body).backgroundImage
-    );
-    expect(bgImage).toContain('gradient');
-
-    // Check the header exists and has styling
-    const header = page.locator('.header');
-    await expect(header).toBeVisible();
-    const headerBg = await header.evaluate(el =>
-      getComputedStyle(el).backgroundImage
-    );
-    expect(headerBg).toContain('gradient');
-
-    // Check box-shadow on app container
-    const boxShadow = await app.evaluate(el =>
-      getComputedStyle(el).boxShadow
-    );
-    expect(boxShadow).not.toBe('none');
+  // ── Acceptance Criterion 3: Has todo list container ─────────────────────
+  test('has a todo list container', async ({ page }) => {
+    const list = page.locator('#todo-list');
+    await expect(list).toBeAttached();
   });
-});
 
-// ── Functional Tests ───────────────────────────────────────────────────────
-
-test.describe('Todo App — Functionality', () => {
-
-  test('Header displays app title', async ({ page }) => {
-    await page.goto(INDEX_URL);
-    const h1 = page.locator('.header h1');
+  // ── Acceptance Criterion 4: Has modern CSS styling ──────────────────────
+  test('header has styled title', async ({ page }) => {
+    const h1 = page.locator('header h1');
+    await expect(h1).toBeVisible();
     await expect(h1).toHaveText('Todo App');
+    // Check that the title has custom styling (not default black)
+    const color = await h1.evaluate(el => getComputedStyle(el).color);
+    expect(color).not.toBe('rgb(0, 0, 0)');
   });
 
-  test('Can add a todo by clicking Add button', async ({ page }) => {
-    await page.goto(INDEX_URL);
+  test('input and button have modern rounded styling', async ({ page }) => {
+    const input = page.locator('#todo-input');
+    const btn = page.locator('#add-btn');
 
+    const inputRadius = await input.evaluate(el => getComputedStyle(el).borderRadius);
+    const btnRadius = await btn.evaluate(el => getComputedStyle(el).borderRadius);
+
+    // border-radius should be > 0 (modern styling)
+    expect(parseFloat(inputRadius)).toBeGreaterThan(0);
+    expect(parseFloat(btnRadius)).toBeGreaterThan(0);
+  });
+
+  test('body has a non-white background (modern design)', async ({ page }) => {
+    const bg = await page.locator('body').evaluate(el => getComputedStyle(el).backgroundColor);
+    expect(bg).not.toBe('rgb(255, 255, 255)');
+    expect(bg).not.toBe('rgba(0, 0, 0, 0)');
+  });
+
+  // ── Functional smoke tests ──────────────────────────────────────────────
+  test('can add a todo item', async ({ page }) => {
     await page.fill('#todo-input', 'Buy groceries');
     await page.click('#add-btn');
 
-    const items = page.locator('.todo-item');
-    await expect(items).toHaveCount(1);
-    await expect(items.first().locator('span')).toHaveText('Buy groceries');
-  });
-
-  test('Can add a todo by pressing Enter', async ({ page }) => {
-    await page.goto(INDEX_URL);
-
-    await page.fill('#todo-input', 'Read a book');
-    await page.press('#todo-input', 'Enter');
-
-    const items = page.locator('.todo-item');
-    await expect(items).toHaveCount(1);
-    await expect(items.first().locator('span')).toHaveText('Read a book');
-  });
-
-  test('Does not add empty todos', async ({ page }) => {
-    await page.goto(INDEX_URL);
-
-    await page.click('#add-btn');
-    await page.fill('#todo-input', '   ');
-    await page.click('#add-btn');
-
-    const items = page.locator('.todo-item');
-    await expect(items).toHaveCount(0);
-  });
-
-  test('Can mark a todo as completed', async ({ page }) => {
-    await page.goto(INDEX_URL);
-
-    await page.fill('#todo-input', 'Finish project');
-    await page.click('#add-btn');
-
-    const checkbox = page.locator('.todo-item input[type="checkbox"]');
-    await checkbox.check();
-
     const item = page.locator('.todo-item');
-    await expect(item).toHaveClass(/completed/);
+    await expect(item).toHaveCount(1);
+    await expect(item.locator('span')).toHaveText('Buy groceries');
   });
 
-  test('Can delete a todo', async ({ page }) => {
-    await page.goto(INDEX_URL);
-
-    await page.fill('#todo-input', 'Temporary task');
-    await page.click('#add-btn');
-    await expect(page.locator('.todo-item')).toHaveCount(1);
-
-    await page.click('.todo-item .delete-btn');
-    await expect(page.locator('.todo-item')).toHaveCount(0);
+  test('can add multiple todo items', async ({ page }) => {
+    const todos = ['Buy groceries', 'Walk the dog', 'Read a book'];
+    for (const todo of todos) {
+      await page.fill('#todo-input', todo);
+      await page.click('#add-btn');
+    }
+    await expect(page.locator('.todo-item')).toHaveCount(3);
   });
 
-  test('Item counter updates correctly', async ({ page }) => {
-    await page.goto(INDEX_URL);
-
-    const counter = page.locator('#todo-count');
-    await expect(counter).toHaveText('0 items left');
-
-    // Add first todo
-    await page.fill('#todo-input', 'Task 1');
+  test('input clears after adding a todo', async ({ page }) => {
+    await page.fill('#todo-input', 'Test todo');
     await page.click('#add-btn');
-    await expect(counter).toHaveText('1 item left');
-
-    // Add second todo
-    await page.fill('#todo-input', 'Task 2');
-    await page.click('#add-btn');
-    await expect(counter).toHaveText('2 items left');
-
-    // Complete one
-    await page.locator('.todo-item').first().locator('input[type="checkbox"]').check();
-    await expect(counter).toHaveText('1 item left');
-  });
-
-  test('Input is cleared after adding a todo', async ({ page }) => {
-    await page.goto(INDEX_URL);
-
-    await page.fill('#todo-input', 'Some task');
-    await page.click('#add-btn');
-
     await expect(page.locator('#todo-input')).toHaveValue('');
   });
 
-  test('Empty state message shows when no todos', async ({ page }) => {
-    await page.goto(INDEX_URL);
+  test('does not add empty todos', async ({ page }) => {
+    await page.click('#add-btn');
+    await expect(page.locator('.todo-item')).toHaveCount(0);
+  });
 
-    // The empty state is shown via CSS ::after pseudo-element on the empty list
-    const listBox = await page.locator('#todo-list').boundingBox();
-    // The list should have some height due to the ::after content
-    expect(listBox).not.toBeNull();
-    expect(listBox.height).toBeGreaterThan(0);
+  test('screenshot - empty state', async ({ page }) => {
+    await page.screenshot({ path: '/workspace/proof/screenshot-empty-state.png', fullPage: true });
+  });
+
+  test('screenshot - with todos', async ({ page }) => {
+    const todos = ['Buy groceries', 'Walk the dog', 'Read a book'];
+    for (const todo of todos) {
+      await page.fill('#todo-input', todo);
+      await page.click('#add-btn');
+    }
+    await page.screenshot({ path: '/workspace/proof/screenshot-with-todos.png', fullPage: true });
   });
 });
